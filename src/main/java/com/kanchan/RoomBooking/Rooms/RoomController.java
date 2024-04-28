@@ -1,5 +1,6 @@
 package com.kanchan.RoomBooking.Rooms;
 
+import com.kanchan.RoomBooking.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,13 @@ public class RoomController {
     }
 
     // Get Rooms by capacity
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<Object> getRoomsByCapacity(@RequestParam int capacity) {
-        if (capacity <= 0) {
-            return ResponseEntity.badRequest().body("Invalid parameters");
+        if (capacity < 0) {
+            Map<String, Object> error = Error.errorResponse("Invalid capacity");
+            return ResponseEntity.badRequest().body(error);
         }
+
         return roomService.getRoomsByCapacity(capacity);
     }
 
@@ -29,11 +32,13 @@ public class RoomController {
     public ResponseEntity<Object> addRoom(@RequestBody Map<String, String> roomDetails) {
         String roomName = roomDetails.get("roomName");
         if (roomDetails.get("roomCapacity") == null || roomName == null) {
-            return ResponseEntity.badRequest().body("Invalid parameters");
+            Map<String, Object> error = Error.errorResponse("Invalid parameters");
+            return ResponseEntity.badRequest().body(error);
         }
         int roomCapacity = Integer.parseInt(roomDetails.get("roomCapacity"));
-        if ( roomCapacity <= 0) {
-            return ResponseEntity.badRequest().body("Invalid capacity");
+        if ( roomCapacity < 0) {
+            Map<String, Object> error = Error.errorResponse("Invalid capacity");
+            return ResponseEntity.badRequest().body(error);
         }
         return roomService.addRoom(roomName, roomCapacity);
     }

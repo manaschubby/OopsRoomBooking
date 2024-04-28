@@ -2,9 +2,9 @@ package com.kanchan.RoomBooking.Users;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -16,9 +16,19 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<Object> fetchUserById(@RequestParam int userID){
+        return userService.fetchUserById(userID);
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<Object> signUp(@RequestBody UserModel user) {
-        return ResponseEntity.ok(user.getEmail() + " signed up successfully");
+        return userService.signUp(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@RequestBody Map<String, String> loginRequest) {
+        return userService.login(loginRequest);
     }
 
 

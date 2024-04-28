@@ -49,5 +49,10 @@ public class UserController {
         return userService.getUpcomingBookingsByUserId(userId);
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<Object> getALLUsers() {
+        return userService.getALLUsers();
+    }
+
 
 }

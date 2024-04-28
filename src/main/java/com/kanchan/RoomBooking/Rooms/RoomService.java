@@ -2,6 +2,7 @@ package com.kanchan.RoomBooking.Rooms;
 
 import com.kanchan.RoomBooking.Bookings.BookingModel;
 import com.kanchan.RoomBooking.Bookings.BookingRepository;
+import com.kanchan.RoomBooking.Error;
 import com.kanchan.RoomBooking.Users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -58,5 +59,33 @@ public class RoomService {
         room.setRoomCapacity(roomCapacity);
         roomRepository.save(room);
         return ResponseEntity.ok("Room created successfully");
+    }
+
+    public ResponseEntity<Object> deleteRoom(int roomId) {
+        RoomModel room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            Map<String, Object> error = Error.errorResponse("Room does not exist");
+            return ResponseEntity.badRequest().body(error   );
+        }
+        roomRepository.delete(room);
+        return ResponseEntity.ok("Room deleted successfully");
+    }
+
+    public ResponseEntity<Object> updateRoom(int roomId, Map<String, String> roomDetails) {
+        RoomModel room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            Map<String, Object> error = Error.errorResponse("Room does not exist");
+            return ResponseEntity.badRequest().body(error);
+        }
+        String roomName = roomDetails.get("roomName");
+        if (roomName != null) {
+            room.setRoomName(roomName);
+        }
+        String roomCapacity = roomDetails.get("roomCapacity");
+        if (roomCapacity != null) {
+            room.setRoomCapacity(Integer.parseInt(roomCapacity));
+        }
+        roomRepository.save(room);
+        return ResponseEntity.ok("Room updated successfully");
     }
 }

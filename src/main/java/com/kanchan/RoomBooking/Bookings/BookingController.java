@@ -56,8 +56,28 @@ public class BookingController {
     }
 
     @GetMapping("")
-    public ResponseEntity<Object> getBookingsByUserId(@RequestParam int userId) {
-        return bookingService.getBookingsByUserId(userId);
+    public ResponseEntity<Object> getBookingsByUserId(@RequestParam int userID) {
+        return bookingService.getBookingsByUserId(userID);
+    }
+
+    @DeleteMapping("")
+    public ResponseEntity<Object> deleteBooking(@RequestParam int bookingID) {
+        return bookingService.deleteBooking(bookingID);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<Object> updateBooking(@RequestBody Map<String, String> bookingDetails) {
+        int bookingId = Integer.parseInt(bookingDetails.get("bookingID"));
+        String purpose = bookingDetails.get("purpose");
+        String timeFrom = bookingDetails.get("timeFrom");
+        String timeTo = bookingDetails.get("timeTo");
+        String dateOfBooking = bookingDetails.get("dateOfBooking");
+        String userId = bookingDetails.get("userID");
+        if (purpose == null && timeFrom == null && timeTo == null && dateOfBooking == null && userId == null) {
+            Map<String, Object> error = Error.errorResponse("Invalid parameters");
+            return ResponseEntity.badRequest().body(error);
+        }
+        return bookingService.updateBooking(bookingId, bookingDetails);
     }
 
 }

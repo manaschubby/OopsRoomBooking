@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -20,8 +21,19 @@ public class UserService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BookingRepository bookingRepository) {
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
+    }
+
+    public ResponseEntity<Object> getALLUsers() {
+        List<UserModel> users = userRepository.findAll();
+        ArrayList<Map<String, Object>> usersMap = new ArrayList<>();
+        for (UserModel user : users) {
+            Map<String, Object> userMap = Map.of("name", user.getName(), "email", user.getEmail(), "userID", user.getId());
+            usersMap.add(userMap);
+        }
+        return ResponseEntity.ok(usersMap);
     }
 
     public ResponseEntity<Object> signUp(UserModel user) {

@@ -42,4 +42,25 @@ public class RoomController {
         }
         return roomService.addRoom(roomName, roomCapacity);
     }
+
+    @DeleteMapping("")
+    public ResponseEntity<Object> deleteRoom(@RequestParam int roomID) {
+        return roomService.deleteRoom(roomID);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<Object> updateRoom(@RequestBody Map<String, String> roomDetails) {
+        String roomName = roomDetails.get("roomName");
+        if (roomDetails.get("roomCapacity") == null || roomName == null) {
+            Map<String, Object> error = Error.errorResponse("Invalid parameters");
+            return ResponseEntity.badRequest().body(error);
+        }
+        int roomCapacity = Integer.parseInt(roomDetails.get("roomCapacity"));
+        if ( roomCapacity < 0) {
+            Map<String, Object> error = Error.errorResponse("Invalid capacity");
+            return ResponseEntity.badRequest().body(error);
+        }
+        int roomID = Integer.parseInt(roomDetails.get("roomID"));
+        return roomService.updateRoom(roomID, roomDetails);
+    }
 }

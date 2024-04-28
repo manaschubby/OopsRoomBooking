@@ -1,5 +1,6 @@
 package com.kanchan.RoomBooking.Bookings;
 
+import com.kanchan.RoomBooking.Error;
 import com.kanchan.RoomBooking.Rooms.RoomModel;
 import com.kanchan.RoomBooking.Rooms.RoomRepository;
 import com.kanchan.RoomBooking.Users.UserModel;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,5 +74,69 @@ public class BookingService {
             allBookingsMap.add(UserService.convertBookingModelToMap(booking));
         }
         return ResponseEntity.ok(allBookingsMap);
+    }
+
+    public ResponseEntity<Object> deleteBooking(int bookingId) {
+        BookingModel booking = bookingRepository.findById(bookingId).orElse(null);
+        if (booking == null) {
+            Map<String, Object> error = Error.errorResponse("Booking does not exist");
+            return ResponseEntity.badRequest().body(error);
+        }
+        bookingRepository.delete(booking);
+        return ResponseEntity.ok("Booking deleted successfully");
+    }
+
+    public ResponseEntity<Object> updateBooking(int bookingId, Map<String, String> bookingDetails) {
+        BookingModel booking = bookingRepository.findById(bookingId).orElse(null);
+        if (booking == null) {
+            Map<String, Object> error = Error.errorResponse("Booking does not exist");
+            return ResponseEntity.badRequest().body(error
+            );
+        }
+        String purpose = bookingDetails.get("purpose");
+        if (purpose != null) {
+            booking.setPurpose(purpose);
+        }
+        String timeFrom = bookingDetails.get("timeFrom");
+        if (timeFrom != null) {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+            try {
+                booking.setTimeFrom(timeFormat.parse(timeFrom));
+            } catch (Exception e) {
+                Map<String, Object> error = Error.errorResponse("Invalid time");
+                return ResponseEntity.badRequest().body(error);
+            }
+        }
+        if (bookingDetails.get("timeTo") != null) {
+            String timeTo = bookingDetails.get("timeTo");
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+            try {
+                booking.setTimeTo(timeFormat.parse(timeTo));
+            } catch (Exception e) {
+                Map<String, Object> error = Error.errorResponse("Invalid time");
+                return ResponseEntity.badRequest().body(error);
+            }
+        }
+        if (bookingDetails.get("dateOfBooking") != null) {
+            String dateOfBooking = bookingDetails.get("dateOfBooking");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                booking.setDateOfBooking(dateFormat.parse(dateOfBooking));
+            } catch (Exception e) {
+                Map<String, Object> error = Error.errorResponse("Invalid date");
+                return ResponseEntity.badRequest().body(error);
+            }
+        }
+        if (bookingDetails.get("userID") != null) {
+            int userId = Integer.parseInt(bookingDetails.get("userID"));
+            UserModel user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                Map<String, Object> error = Error.errorResponse("User does not exist");
+                return ResponseEntity.badRequest().body(error);
+            }
+            booking.setUser(user);
+        }
+        bookingRepository.save(booking);
+        return ResponseEntity.ok("Booking updated successfully");
     }
 }

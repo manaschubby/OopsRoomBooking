@@ -77,6 +77,11 @@ public class RoomService {
             Map<String, Object> error = Error.errorResponse("Room does not exist");
             return ResponseEntity.badRequest().body(error);
         }
+        RoomModel existingRoom = roomRepository.findByRoomName(roomDetails.get("roomName"));
+        if (existingRoom != null && !Objects.equals(existingRoom.getId(), room.getId())) {
+            Map<String, Object> error = Error.errorResponse("Room already exists");
+            return ResponseEntity.badRequest().body(error);
+        }
         String roomName = roomDetails.get("roomName");
         if (roomName != null) {
             room.setRoomName(roomName);

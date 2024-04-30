@@ -49,10 +49,13 @@ public class RoomService {
         return ResponseEntity.ok(roomsMap);
     }
 
-    public ResponseEntity<Object> addRoom(String roomName, int roomCapacity) {
+    public ResponseEntity<Object> addRoom(String roomName, int roomCapacity, boolean roomError) {
         RoomModel existingRoom = roomRepository.findByRoomName(roomName);
         if (existingRoom != null) {
-            return ResponseEntity.badRequest().body("Room already exists");
+            return ResponseEntity.badRequest().body(Error.errorResponse("Room already exists"));
+        }
+        if (roomError) {
+            return ResponseEntity.badRequest().body(Error.errorResponse("Invalid capacity"));
         }
         RoomModel room = new RoomModel();
         room.setRoomName(roomName);
@@ -65,13 +68,13 @@ public class RoomService {
         RoomModel room = roomRepository.findById(roomId).orElse(null);
         if (room == null) {
             Map<String, Object> error = Error.errorResponse("Room does not exist");
-            return ResponseEntity.badRequest().body(error   );
+            return ResponseEntity.badRequest().body(error);
         }
         roomRepository.delete(room);
         return ResponseEntity.ok("Room deleted successfully");
     }
 
-    public ResponseEntity<Object> updateRoom(int roomId, Map<String, String> roomDetails) {
+    public ResponseEntity<Object> updateRoom(int roomId, Map<String, String> roomDetails, boolean roomError) {
         RoomModel room = roomRepository.findById(roomId).orElse(null);
         if (room == null) {
             Map<String, Object> error = Error.errorResponse("Room does not exist");
@@ -82,9 +85,13 @@ public class RoomService {
             Map<String, Object> error = Error.errorResponse("Room already exists");
             return ResponseEntity.badRequest().body(error);
         }
+        if (roomError) {
+            return ResponseEntity.badRequest().body(Error.errorResponse("Invalid capacity"));
+        }
         String roomName = roomDetails.get("roomName");
         if (roomName != null) {
             room.setRoomName(roomName);
+
         }
         String roomCapacity = roomDetails.get("roomCapacity");
         if (roomCapacity != null) {

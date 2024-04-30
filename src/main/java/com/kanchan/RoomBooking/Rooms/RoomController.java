@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/rooms")
@@ -19,13 +20,17 @@ public class RoomController {
 
     // Get Rooms by capacity
     @GetMapping("")
-    public ResponseEntity<Object> getRoomsByCapacity(@RequestParam int capacity) {
-        if (capacity < 0) {
+    public ResponseEntity<Object> getRoomsByCapacity(@RequestParam Optional<Integer> capacity) {
+        if (!capacity.isPresent()) {
+            return roomService.getRoomsByCapacity(0);
+        } else {
+
+        if (capacity.get() < 0) {
             Map<String, Object> error = Error.errorResponse("Invalid capacity");
             return ResponseEntity.badRequest().body(error);
         }
 
-        return roomService.getRoomsByCapacity(capacity);
+        return roomService.getRoomsByCapacity(capacity.get());}
     }
 
     @PostMapping("")
@@ -36,11 +41,12 @@ public class RoomController {
             return ResponseEntity.badRequest().body(error);
         }
         int roomCapacity = Integer.parseInt(roomDetails.get("roomCapacity"));
+        boolean roomError = false;
         if ( roomCapacity < 0) {
             Map<String, Object> error = Error.errorResponse("Invalid capacity");
-            return ResponseEntity.badRequest().body(error);
+            roomError = true;
         }
-        return roomService.addRoom(roomName, roomCapacity);
+        return roomService.addRoom(roomName, roomCapacity, roomError);
     }
 
     @DeleteMapping("")
@@ -55,12 +61,13 @@ public class RoomController {
             Map<String, Object> error = Error.errorResponse("Invalid parameters");
             return ResponseEntity.badRequest().body(error);
         }
+        boolean roomError = false;
         int roomCapacity = Integer.parseInt(roomDetails.get("roomCapacity"));
         if ( roomCapacity < 0) {
             Map<String, Object> error = Error.errorResponse("Invalid capacity");
             return ResponseEntity.badRequest().body(error);
         }
         int roomID = Integer.parseInt(roomDetails.get("roomID"));
-        return roomService.updateRoom(roomID, roomDetails);
+        return roomService.updateRoom(roomID, roomDetails, roomError);
     }
 }

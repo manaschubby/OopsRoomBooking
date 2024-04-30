@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -27,16 +28,33 @@ public class BookingController {
         int roomId = Integer.parseInt(bookingDetails.get("roomID"));
         String timeFrom = bookingDetails.get("timeFrom");
         String timeTo = bookingDetails.get("timeTo");
+        // If timeFrom or timeTo start with values other than 0 - 23, return error
+        if (timeFrom != null && timeTo != null) {
+
+        }
         String purpose = bookingDetails.get("purpose");
         String invalidDateMessage = "Invalid date/time";
         Map<String, Object> error = Error.errorResponse(invalidDateMessage);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        boolean dateError = false;
         try {
             Date date = dateFormat.parse(bookingDetails.get("dateOfBooking"));
             // Validate time
             DateFormat dateFormat1 = new SimpleDateFormat("HH:mm:ss");
             if (timeFrom == null || timeTo == null) {
-                return ResponseEntity.badRequest().body(error);
+                dateError = true;
+            }
+            assert timeFrom != null;
+            if (Integer.parseInt(timeFrom.split(":")[0]) < 0 || Integer.parseInt(timeFrom.split(":")[0]) > 23) {
+                dateError = true;
+            }
+            // If minutes are not between 0 and 59, return error
+            if (Integer.parseInt(timeFrom.split(":")[1]) < 0 || Integer.parseInt(timeFrom.split(":")[1]) > 59) {
+                dateError = true;
+            }
+            // If seconds are not between 0 and 59, return error
+            if (Integer.parseInt(timeFrom.split(":")[2]) < 0 || Integer.parseInt(timeFrom.split(":")[2]) > 59) {
+                dateError = true;
             }
             // Parse time
             try {
@@ -45,13 +63,13 @@ public class BookingController {
                 if (timeFromDate.after(timeToDate)) {
                     return ResponseEntity.badRequest().body(error);
                 }
-                return bookingService.addBooking(userId, roomId, date, timeFromDate, timeToDate, purpose);
+                return bookingService.addBooking(userId, roomId, date, timeFromDate, timeToDate, purpose, dateError);
             } catch (Exception e) {
-                return ResponseEntity.badRequest().body(error);
+                return bookingService.addBooking(userId, roomId, date, new Date(), new Date(), purpose, true);
             }
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(error);
+            return bookingService.addBooking(userId, roomId, new Date(), new Date(), new Date(), purpose, true);
         }
     }
 
@@ -77,7 +95,23 @@ public class BookingController {
             Map<String, Object> error = Error.errorResponse("Invalid parameters");
             return ResponseEntity.badRequest().body(error);
         }
-        return bookingService.updateBooking(bookingId, bookingDetails);
+        boolean dateError = false;
+        if (timeFrom == null || timeTo == null) {
+            dateError = true;
+        }
+        assert timeFrom != null;
+        if (Integer.parseInt(timeFrom.split(":")[0]) < 0 || Integer.parseInt(timeFrom.split(":")[0]) > 23) {
+            dateError = true;
+        }
+        // If minutes are not between 0 and 59, return error
+        if (Integer.parseInt(timeFrom.split(":")[1]) < 0 || Integer.parseInt(timeFrom.split(":")[1]) > 59) {
+            dateError = true;
+        }
+        // If seconds are not between 0 and 59, return error
+        if (Integer.parseInt(timeFrom.split(":")[2]) < 0 || Integer.parseInt(timeFrom.split(":")[2]) > 59) {
+            dateError = true;
+        }
+        return bookingService.updateBooking(bookingId, bookingDetails, dateError);
     }
 
 }

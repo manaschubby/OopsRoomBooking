@@ -4,6 +4,7 @@ import com.kanchan.RoomBooking.Bookings.BookingModel;
 import com.kanchan.RoomBooking.Bookings.BookingRepository;
 import com.kanchan.RoomBooking.Error;
 import com.kanchan.RoomBooking.Users.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,12 +65,14 @@ public class RoomService {
         return ResponseEntity.ok("Room created successfully");
     }
 
+    @Transactional
     public ResponseEntity<Object> deleteRoom(int roomId) {
         RoomModel room = roomRepository.findById(roomId).orElse(null);
         if (room == null) {
             Map<String, Object> error = Error.errorResponse("Room does not exist");
             return ResponseEntity.badRequest().body(error);
         }
+        bookingRepository.deleteAllByRoom(room);
         roomRepository.delete(room);
         return ResponseEntity.ok("Room deleted successfully");
     }

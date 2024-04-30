@@ -1,5 +1,6 @@
 package com.kanchan.RoomBooking.Bookings;
 
+import com.kanchan.RoomBooking.Rooms.RoomModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +23,5 @@ public interface BookingRepository extends JpaRepository<BookingModel, Integer> 
 
     BookingModel findByRoomIdAndDateOfBookingAndTimeFromGreaterThanEqualAndTimeToLessThanEqual(int roomId,Date dateOfBooking, Date timeFrom, Date timeTo);
 
+    void deleteAllByRoom(RoomModel room);
 }
